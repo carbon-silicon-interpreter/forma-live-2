@@ -49,7 +49,7 @@ const buildProjects = () => {
     return [
         {
             id: 'live-default',
-            title: liveProjectName,
+            title: '法保网企业常年法律顾问手册',
             status: 'distributed',
             updatedAt: '刚刚更新',
             views: '1.3k',
@@ -61,7 +61,7 @@ const buildProjects = () => {
         },
         {
             id: 'tax-onboarding',
-            title: '财税代理 onboarding',
+            title: '新桥餐饮财税合规运营手册',
             status: 'distributed',
             updatedAt: '今天 09:20',
             views: '842',
@@ -73,7 +73,7 @@ const buildProjects = () => {
         },
         {
             id: 'audit-delivery',
-            title: '年度审计交付',
+            title: '2026 企业年度财务审计手册',
             status: 'distributed',
             updatedAt: '昨天 18:40',
             views: '516',
@@ -85,7 +85,7 @@ const buildProjects = () => {
         },
         {
             id: 'hr-training',
-            title: 'HR 合规培训',
+            title: '中小企业用工风险防范手册',
             status: 'draft',
             updatedAt: '昨天 11:05',
             views: '128',
@@ -99,9 +99,9 @@ const buildProjects = () => {
 
 const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return '早上好，小步';
-    if (hour >= 12 && hour < 18) return '下午好，小步';
-    return '晚上好，小步';
+    if (hour >= 5 && hour < 12) return '早上好，不二';
+    if (hour >= 12 && hour < 18) return '下午好，不二';
+    return '晚上好，不二';
 };
 
 const getSubtitle = () => {
@@ -158,12 +158,11 @@ const DashboardView = () => {
                         {getTodayLabel()}
                     </p>
                     <h2
-                        className="mb-3 text-5xl leading-[1.15] tracking-tight text-zinc-900 md:text-7xl"
+                        className="mb-3 text-4xl leading-[1.15] tracking-tight text-zinc-900 md:text-5xl"
                         style={{ fontFamily: "'Lora', Georgia, serif", fontWeight: 500 }}
                     >
                         {getGreeting()}
                     </h2>
-                    <p className="text-base text-zinc-500">{getSubtitle()}</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -177,7 +176,7 @@ const DashboardView = () => {
                                 <Plus size={20} />
                             </div>
                             <h3 className="mb-2 text-xl font-semibold tracking-tight text-zinc-900">
-                                创建 living handbook
+                                创建企业服务手册
                             </h3>
                             <p className="text-sm leading-6 text-zinc-500">
                                 从空白项目或已有模板快速开始。

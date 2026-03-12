@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import PreviewView from '../PreviewView/PreviewView';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     ArrowLeft, Save, RefreshCw, Sparkles, Send, Palette, Bot,
-    CheckCircle2, WandSparkles, MonitorPlay, Settings2, Eye, Settings
+    CheckCircle2, WandSparkles, Settings2, Eye, Settings, Brain
 } from 'lucide-react';
 
 const CONFIG_META = {
@@ -19,7 +19,7 @@ const CONFIG_META = {
         badge: '助理策略',
         title: 'AI助力配置',
         description: '左侧是 AI 助理的身份、路由和洞察策略。调整后可以再更新中间预览。',
-        previewDescription: '建议切到运营视图检查 Copilot 洞察和引导链路是否合理。'
+        previewDescription: '建议切到运营视图检查 AI编辑 洞察和引导链路是否合理。'
     }
 };
 
@@ -224,25 +224,25 @@ const summarizeAiAdjustments = (prompt, values, pages) => {
 
     if (/主动|转化|引导|成交/.test(prompt)) {
         nextValues.responseTone = 'proactive';
-        nextValues.assistantName = '转化顾问 Copilot';
+        nextValues.assistantName = '转化顾问 AI编辑';
         nextValues.welcomeMessage = '你好，我会先帮您识别风险和优先级，再把您带到最值得先看的模块。如果方便，建议先做 1 分钟诊断。';
         nextValues.quickActionAssessment = '先帮我做 1 分钟风险诊断';
         nextValues.quickActionContract = '给我一套可直接复用的标准资料';
         nextValues.quickActionRisk = '先看最容易踩坑的风险点';
-        notes.push('Copilot 已切到更主动的引导式回答');
+        notes.push('AI编辑 已切到更主动的引导式回答');
     }
 
     if (/顾问|审慎|专业|稳妥/.test(prompt)) {
         nextValues.responseTone = 'advisor';
-        nextValues.assistantName = '专业顾问 Copilot';
+        nextValues.assistantName = '专业顾问 AI编辑';
         nextValues.welcomeMessage = '你好，我会先帮您判断问题属于诊断、资料还是风险排查，再给出最合适的下一步。';
-        notes.push('Copilot 被调整成更审慎的顾问式语气');
+        notes.push('AI编辑 被调整成更审慎的顾问式语气');
     }
 
     if (/讲解|教学|解释/.test(prompt)) {
         nextValues.responseTone = 'teaching';
         nextValues.welcomeMessage = '你好，我会先把问题和边界讲清楚，再推荐适合继续深入的模块。';
-        notes.push('Copilot 回答被调整成更偏讲解式');
+        notes.push('AI编辑 回答被调整成更偏讲解式');
     }
 
     if (/问卷|诊断|体检/.test(prompt) && questionnairePage) {
@@ -264,9 +264,9 @@ const summarizeAiAdjustments = (prompt, values, pages) => {
     }
 
     if (/运营|洞察|意图/.test(prompt)) {
-        nextValues.insightsTitle = 'Copilot 高意向访客洞察';
+        nextValues.insightsTitle = 'AI编辑 高意向访客洞察';
         nextValues.painPointHeadline = '高意向用户集中在追问风险边界和下一步动作';
-        nextValues.painPointSummary = '运营数据说明，高意向用户不只是在问概念，而是在持续追问风险边界、资料领取和下一步落地动作。Copilot 应优先把这些人带到诊断或标准资料模块。';
+        nextValues.painPointSummary = '运营数据说明，高意向用户不只是在问概念，而是在持续追问风险边界、资料领取和下一步落地动作。AI编辑 应优先把这些人带到诊断或标准资料模块。';
         notes.push('运营洞察口径已重写成更偏线索识别的表达');
     }
 
@@ -280,7 +280,6 @@ const summarizeAiAdjustments = (prompt, values, pages) => {
 function GlobalConfigEditorView({ globalConfigs, setGlobalConfigs, pages, materials }) {
     const { id } = useParams();
     const navigate = useNavigate();
-    const messagesEndRef = useRef(null);
     const config = globalConfigs.find(item => item.id === id);
     const meta = config ? CONFIG_META[config.type] : null;
     const MetaIcon = meta?.icon;
@@ -299,6 +298,7 @@ function GlobalConfigEditorView({ globalConfigs, setGlobalConfigs, pages, materi
     // Per-section edit state
     const [sectionEditing, setSectionEditing] = useState({}); // { [sectionId]: boolean }
     const [sectionDrafts, setSectionDrafts] = useState({});   // { [sectionId]: partial values snapshot }
+    const messagesEndRef = useRef(null);
 
     const startEditSection = (sectionId, fieldIds) => {
         const snapshot = {};
@@ -339,7 +339,7 @@ function GlobalConfigEditorView({ globalConfigs, setGlobalConfigs, pages, materi
                 role: 'ai',
                 text: config.type === 'style'
                     ? '我已经基于当前业务场景生成了一版站点风格草案。你可以直接改左侧参数，或者让我继续往更专业、更像 handbook 的方向收敛。'
-                    : '我已经接管 Copilot 的身份、快捷问题、路由策略和运营洞察口径。你可以告诉我应该把用户先引到哪里。'
+                    : '我已经接管 AI编辑 的身份、快捷问题、路由策略和运营洞察口径。你可以告诉我应该把用户先引到哪里。'
             }
         ]);
     }, [config?.id, pages]);
@@ -419,11 +419,10 @@ function GlobalConfigEditorView({ globalConfigs, setGlobalConfigs, pages, materi
             <div className="p-6 border-b border-zinc-100 bg-white">
                 <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700">
-                        <Sparkles size={20} />
+                        <Brain size={20} />
                     </div>
                     <div className="min-w-0">
-                        <h4 className="font-bold text-base text-zinc-900 truncate">Copilot</h4>
-                        <p className="mt-1 text-sm text-zinc-500 truncate">{config.name}</p>
+                        <h4 className="font-bold text-base text-zinc-900 truncate">AI编辑</h4>
                     </div>
                 </div>
             </div>
@@ -512,9 +511,14 @@ function GlobalConfigEditorView({ globalConfigs, setGlobalConfigs, pages, materi
                         <button onClick={() => navigate('/editor')} className="w-10 h-10 rounded-full bg-zinc-50 border border-zinc-200/50 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 transition-all">
                             <ArrowLeft size={18} />
                         </button>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="w-px h-6 bg-zinc-200" />
-                            <h2 className="text-[18px] font-black tracking-tight text-zinc-900 leading-none">{localName}</h2>
+                            <input
+                                type="text"
+                                value={localName}
+                                onChange={(e) => setLocalName(e.target.value)}
+                                className="bg-transparent border-none p-0 text-[18px] font-black tracking-tight text-zinc-900 focus:outline-none focus:ring-0 w-full"
+                            />
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -640,9 +644,14 @@ function GlobalConfigEditorView({ globalConfigs, setGlobalConfigs, pages, materi
                     <button onClick={() => navigate('/editor')} className="w-10 h-10 rounded-full bg-zinc-50 border border-zinc-200/50 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 transition-all">
                         <ArrowLeft size={18} />
                     </button>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="w-px h-6 bg-zinc-200" />
-                        <h2 className="text-[18px] font-black tracking-tight text-zinc-900 leading-none">{localName}</h2>
+                        <input
+                            type="text"
+                            value={localName}
+                            onChange={(e) => setLocalName(e.target.value)}
+                            className="bg-transparent border-none p-0 text-[18px] font-black tracking-tight text-zinc-900 focus:outline-none focus:ring-0 w-full"
+                        />
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -872,7 +881,7 @@ function StyleShellPreview({ values, pages }) {
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    {['Overview', 'Modules', 'Resources', 'Copilot'].map(item => (
+                                    {['Overview', 'Modules', 'Resources', 'AI编辑'].map(item => (
                                         <span key={item} className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600">
                                             {item}
                                         </span>

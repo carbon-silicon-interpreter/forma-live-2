@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
-    ArrowLeft, Eye, Edit3, Trash2, Send, RefreshCw, CheckCircle2, Plus, Play,
-    Sparkles, Image, Link2, FileText, Brain, GripVertical, Settings, BarChart3,
-    Layers, LayoutTemplate, MessageSquare, Video, FileBadge, Box, MonitorPlay,
-    Save, ChevronRight, ExternalLink, Clock, Type, Palette, Globe, Search,
-    Smartphone
+    ArrowLeft, Eye, Send, RefreshCw, CheckCircle2, Sparkles, Image, FileText, Brain,
+    Settings, LayoutTemplate, MessageSquare, Box, Type, Palette, MonitorPlay, Save,
+    Smartphone, ChevronRight, Edit3, BarChart3, Globe, Link2, FileBadge, Play, Plus,
+    MoreHorizontal, Trash2, EyeOff, ChevronDown
 } from 'lucide-react';
 import PptViewer from '../../components/blocks/PptViewer';
 import Questionnaire from '../../components/blocks/Questionnaire';
@@ -43,19 +42,15 @@ const getCopilotMessages = (page) => {
 const MODULE_VIEW_META = {
     video: {
         previewLabel: '智能课程',
-        statusLabel: '已经制作了智能课程，请您查看',
     },
     questionnaire: {
         previewLabel: '智能问卷',
-        statusLabel: '已经制作了智能问卷，请您查看',
     },
     ppt: {
         previewLabel: '智能课件',
-        statusLabel: '已经制作了智能课件，请您查看',
     },
     page: {
         previewLabel: '智能报告',
-        statusLabel: '已经制作了智能报告，请您查看',
     },
 };
 
@@ -235,7 +230,7 @@ function getIntermediateSections(page) {
                             kind: 'cards',
                             columns: 1,
                             cards: [
-                                { title: '封面方案 A', description: '黑底 + 红色风险提示条，标题为“高管必看：用工合规避雷指南”。', meta: '当前采用' },
+                                { title: '封面方案 A', description: '黑底 + 红色警示条，标题为“高管必看：用工合规避雷指南”。', meta: '当前采用' },
                                 { title: '封面文案', description: '副标题强调“12 分钟讲清败诉风险与补救动作”。', meta: '自动生成' },
                             ],
                         },
@@ -867,19 +862,27 @@ const ModuleEditorView = ({ pages, setPages }) => {
     const navigate = useNavigate();
     const page = pages.find(p => p.id === id);
 
+    const assistantWelcome = '你好！我是你的 AI 助理，有什么可以帮你的吗？';
     const [chatMessagesByPageId, setChatMessagesByPageId] = useState({});
     const [chatInput, setChatInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const [draftNames, setDraftNames] = useState({});
-    const [isSaving, setIsSaving] = useState(false);
+    const isDraft = page?.tags?.includes('草稿');
+
     const [activeTab, setActiveTab] = useState('preview'); // preview | materials | thinking
+    const [showMoreMenu, setShowMoreMenu] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
     const [previewDevice, setPreviewDevice] = useState('desktop'); // desktop | mobile
     const [selectedMaterialByPageId, setSelectedMaterialByPageId] = useState({});
+    const [chatMessages, setChatMessages] = useState(() => {
+        const initial = chatMessagesByPageId[id] ?? getCopilotMessages(page);
+        return initial.length === 0 ? [{ role: 'ai', text: assistantWelcome }] : initial;
+    });
 
     useEffect(() => {
-        const currentMessages = page ? (chatMessagesByPageId[id] ?? getCopilotMessages(page)) : [];
+        const currentMessages = chatMessagesByPageId[id] ?? getCopilotMessages(page);
         if (currentMessages.length > 0) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
@@ -899,8 +902,6 @@ const ModuleEditorView = ({ pages, setPages }) => {
     const viewMeta = getModuleViewMeta(page.type);
     const materialSections = getIntermediateSections(page);
     const allMaterials = materialSections.flatMap(section => section.items);
-    const localName = draftNames[id] ?? page.name;
-    const chatMessages = chatMessagesByPageId[id] ?? getCopilotMessages(page);
     const selectedMaterialId = selectedMaterialByPageId[id] ?? allMaterials[0]?.id ?? '';
     const selectedMaterial = allMaterials.find(item => item.id === selectedMaterialId) || allMaterials[0];
     const plainWorkspace = activeTab !== 'preview';
@@ -916,14 +917,6 @@ const ModuleEditorView = ({ pages, setPages }) => {
         });
     };
 
-    const handleSave = () => {
-        if (!localName.trim() || !page) return;
-        setIsSaving(true);
-        setTimeout(() => {
-            setPages(prev => prev.map(p => p.id === id ? { ...p, name: localName } : p));
-            setIsSaving(false);
-        }, 600);
-    };
 
     const handleChat = (e) => {
         if (e) e.preventDefault();
@@ -954,6 +947,30 @@ const ModuleEditorView = ({ pages, setPages }) => {
         }, 2000);
     };
 
+    const handleUpdateVisibility = (visible) => {
+        setPages(prev => prev.map(p => p.id === id ? { ...p, visible } : p));
+    };
+
+    const handleDeleteModule = () => {
+        setPages(prev => prev.filter(p => p.id !== id));
+        navigate('/editor');
+    };
+
+    const handleSave = () => {
+        setIsSaving(true);
+        setTimeout(() => setIsSaving(false), 800);
+    };
+
+    const handlePublishUpdate = () => {
+        setIsPublishing(true);
+        setTimeout(() => {
+            if (isDraft) {
+                setPages(prev => prev.map(p => p.id === id ? { ...p, tags: p.tags.filter(t => t !== '草稿') } : p));
+            }
+            setIsPublishing(false);
+        }, 1200);
+    };
+
     return (
         <div className="h-screen w-full flex flex-col overflow-hidden bg-white selection:bg-indigo-100/50">
             {/* ─── Header ─── */}
@@ -962,13 +979,104 @@ const ModuleEditorView = ({ pages, setPages }) => {
                     <button onClick={() => navigate('/editor')} className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-50 text-zinc-500 hover:bg-zinc-100 transition-all border border-zinc-200/50">
                         <ArrowLeft size={18} />
                     </button>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="w-px h-6 bg-zinc-200" />
-                        <h2 className="text-[18px] font-black tracking-tight text-zinc-900">{localName}</h2>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <div className="px-2 py-1 rounded bg-zinc-100 text-zinc-500 text-[11px] font-bold">
+                                {viewMeta.previewLabel}
+                            </div>
+                        </div>
+                        <input
+                            type="text"
+                            value={page.name}
+                            onChange={(e) => {
+                                const newName = e.target.value;
+                                setPages(prev => prev.map(p => p.id === id ? { ...p, name: newName } : p));
+                                handleSave(); // Trigger auto-save feedback
+                            }}
+                            className="bg-transparent border-none p-0 text-[18px] font-black tracking-tight text-zinc-900 focus:outline-none focus:ring-0 w-full"
+                        />
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button className="text-[13px] bg-zinc-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-zinc-800 shadow-lg shadow-zinc-200 transition-all active:scale-95">发布模块</button>
+                <div className="flex items-center gap-4 relative mr-4">
+                    {/* Status Indicators */}
+                    <div className="flex items-center gap-3 pr-2 border-r border-zinc-100 mr-1">
+                        {/* Visibility Status */}
+                        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-bold ${page.visible === false ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                            {page.visible === false ? <EyeOff size={12} /> : <Eye size={12} />}
+                            {page.visible === false ? '已隐藏' : '展示中'}
+                        </div>
+
+                        {/* Save Status */}
+                        <div className="flex items-center gap-1.5 h-6">
+                            {isSaving ? (
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 border border-zinc-100 animate-in fade-in slide-in-from-right-2 duration-300">
+                                    <RefreshCw size={12} className="animate-spin text-zinc-400" />
+                                    <span className="text-[11px] font-bold text-zinc-500 whitespace-nowrap">自动保存中</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1.5 px-2 py-1 opacity-40">
+                                    <CheckCircle2 size={12} className="text-zinc-400" />
+                                    <span className="text-[11px] font-medium text-zinc-400 whitespace-nowrap">已保存</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handlePublishUpdate}
+                        disabled={isPublishing}
+                        className="text-[13px] bg-zinc-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-zinc-800 shadow-lg shadow-zinc-200 transition-all active:scale-95 flex items-center gap-2 min-w-[120px] justify-center"
+                    >
+                        {isPublishing ? (
+                            <RefreshCw size={16} className="animate-spin" />
+                        ) : (
+                            <>
+                                <Send size={16} />
+                                {isDraft ? '发布模块' : '更新模块'}
+                            </>
+                        )}
+                    </button>
+
+                    <div className="relative ml-2">
+                        <button
+                            onClick={() => setShowMoreMenu(!showMoreMenu)}
+                            className={`w-10 h-10 px-0 rounded-xl border transition-all flex items-center justify-center ${showMoreMenu ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300'}`}
+                        >
+                            <MoreHorizontal size={20} />
+                        </button>
+
+                        {showMoreMenu && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                                <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-2xl border border-zinc-100 shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                                    <button
+                                        onClick={() => {
+                                            handleUpdateVisibility(!page.visible);
+                                            setShowMoreMenu(false);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold text-zinc-700 hover:bg-zinc-50 transition-colors"
+                                    >
+                                        {page.visible === false ? <Eye size={16} className="text-zinc-500" /> : <EyeOff size={16} className="text-zinc-500" />}
+                                        {page.visible === false ? '显示模块' : '隐藏模块'}
+                                    </button>
+                                    <div className="h-px bg-zinc-100 my-1 mx-2" />
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('确定要删除这个模块吗？')) {
+                                                handleDeleteModule();
+                                            }
+                                            setShowMoreMenu(false);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                        删除
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -1005,12 +1113,6 @@ const ModuleEditorView = ({ pages, setPages }) => {
 
                         <div className={`flex-1 overflow-hidden relative flex flex-col ${plainWorkspace ? 'bg-[#f6f7fb]' : 'bg-[#fafafa]'}`}>
                             <div className={`flex-1 overflow-y-auto custom-scrollbar relative ${plainWorkspace ? 'p-6 bg-[#f6f7fb]' : 'p-10 bg-gradient-to-b from-white to-zinc-50/50'}`}>
-                                <div className="max-w-6xl mx-auto w-full flex justify-end mb-4">
-                                    <div className="rounded-full bg-violet-50 px-5 py-2 text-[13px] font-semibold text-zinc-700">
-                                        <span className="mr-2">🪄</span>
-                                        {viewMeta.statusLabel} 🎉
-                                    </div>
-                                </div>
                                 <div className="max-w-6xl mx-auto h-full flex flex-col">
                                     {activeTab === 'preview' && (
                                         <div className="animate-in fade-in duration-500 h-full flex flex-col">
@@ -1112,9 +1214,7 @@ function IntermediateMaterialDetail({ item }) {
         <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
             <div className="flex items-start justify-between gap-6 border-b border-zinc-100 px-8 py-6">
                 <div>
-                    <div className="text-xs font-medium text-zinc-400 mb-2">中间产物详情</div>
                     <h2 className="text-2xl font-bold text-zinc-900">{item.title}</h2>
-                    <p className="mt-2 text-sm leading-6 text-zinc-500 max-w-3xl">{item.description}</p>
                 </div>
                 {item.editable && (
                     <button className="inline-flex items-center gap-2 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
@@ -1268,11 +1368,10 @@ function CopilotPanel({ page, chatMessages, chatInput, setChatInput, isGeneratin
             <div className="p-6 border-b border-zinc-100 bg-white">
                 <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700">
-                        <Sparkles size={20} />
+                        <Brain size={20} />
                     </div>
                     <div className="min-w-0">
-                        <h4 className="font-bold text-base text-zinc-900 truncate">Copilot</h4>
-                        <p className="mt-1 text-sm text-zinc-500 truncate">{page.name}</p>
+                        <h4 className="font-bold text-base text-zinc-900 truncate">AI编辑</h4>
                     </div>
                 </div>
             </div>
@@ -1327,20 +1426,6 @@ function ThinkingProcess({ page, isGenerating }) {
 
     return (
         <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 animate-in fade-in duration-300 pb-20">
-            <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-5">
-                <div className="flex items-center justify-between gap-6">
-                    <div>
-                        <h2 className="text-2xl font-bold text-zinc-900">过程</h2>
-                        <p className="mt-1 text-sm text-zinc-500">
-                            按执行顺序展示当前模块的生成记录和中间结果。
-                        </p>
-                    </div>
-                    <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${isGenerating ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
-                        {isGenerating ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                        {isGenerating ? '正在更新中' : '已生成完成'}
-                    </div>
-                </div>
-            </div>
 
             <div className="relative pl-6">
                 <div className="absolute left-[22px] top-4 bottom-4 w-px bg-zinc-200" />
@@ -1607,15 +1692,6 @@ function PagePreview({ page }) {
                         </div>
                     </div>
 
-                    {(page.blocks || []).filter(b => b.type === 'AI Generated').map((b, i) => (
-                        <div key={i} className="animate-in fade-in slide-in-from-left-4 duration-500 bg-indigo-50 border-l-8 border-indigo-600 p-8 rounded-r-3xl">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Sparkles size={16} className="text-indigo-600 fill-indigo-600/20" />
-                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">Latest AI Generation Patch</span>
-                            </div>
-                            <p className="text-indigo-900 font-black text-lg leading-relaxed italic m-0 uppercase tracking-tighter">{b.text}</p>
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>
@@ -1665,21 +1741,21 @@ function PageMaterials({ page }) {
 const style = document.createElement('style');
 style.textContent = `
 @keyframes progress {
-    0 % { transform: translateX(-100 %); }
-    50 % { transform: translateX(0); }
-    100 % { transform: translateX(100 %); }
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0); }
+    100% { transform: translateX(100%); }
 }
-    .custom - scrollbar:: -webkit - scrollbar {
+.custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }
-    .custom - scrollbar:: -webkit - scrollbar - track {
+.custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
-    .custom - scrollbar:: -webkit - scrollbar - thumb {
+.custom-scrollbar::-webkit-scrollbar-thumb {
     background: #e4e4e7;
-    border - radius: 10px;
+    border-radius: 10px;
 }
-    .custom - scrollbar:: -webkit - scrollbar - thumb:hover {
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #d4d4d8;
 }
 `;

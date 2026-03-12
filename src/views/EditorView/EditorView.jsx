@@ -85,7 +85,7 @@ const EditorView = ({
         return {
             icon: Bot,
             accent: 'bg-emerald-50 text-emerald-600',
-            scopeLabel: 'Copilot / Insights / Routing',
+            scopeLabel: 'AI编辑 / Insights / Routing',
             summary: [
                 config.values.assistantName,
                 config.values.responseTone === 'advisor' ? '顾问式回答' : config.values.responseTone === 'proactive' ? '主动引导式' : '讲解式回答',
@@ -281,20 +281,17 @@ const EditorView = ({
                                         </div>
                                     </div>
 
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <h4 className="text-lg font-bold text-zinc-900 mb-1.5 leading-snug">{page.name}</h4>
-                                            <div className="flex gap-1 flex-wrap justify-end">
-                                                {page.tags?.slice(0, 1).map(tag => (
-                                                    <span key={tag} className="text-[10px] font-medium px-2 py-1 bg-zinc-100/80 rounded-full text-zinc-500">{tag}</span>
-                                                ))}
+                                        <div className="p-5 flex-1 flex flex-col">
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="text-lg font-bold text-zinc-900 leading-snug line-clamp-1">{page.name}</h4>
+                                                <div className="flex gap-1 flex-wrap justify-end">
+                                                    {page.tags?.slice(0, 1).map(tag => (
+                                                        <span key={tag} className="text-[10px] font-medium px-2 py-1 bg-zinc-100/80 rounded-full text-zinc-500">{tag}</span>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <p className="text-xs text-zinc-400 font-medium mb-4 line-clamp-2">
-                                            {page.description || '配置您的模块内容与交互策略'}
-                                        </p>
 
-                                        <div className="mt-auto flex items-center justify-end pt-4 border-t border-zinc-50">
+                                            <div className="mt-auto flex items-center justify-end pt-4 border-t border-zinc-50">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); navigate(`/editor/${page.id}`); }}
                                                 className="px-5 py-2 rounded-full bg-zinc-900 text-white hover:bg-zinc-800 text-[11px] font-bold transition-all shadow-sm active:scale-95"

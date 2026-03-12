@@ -338,8 +338,8 @@ const PreviewView = ({
 
             {/* Content Switcher */}
             <div className={`flex-1 relative w-full flex overflow-hidden ${isOperate && activeOperateTab !== 'preview' ? 'hidden' : ''}`}>
-                {/* 左侧悬浮胶囊导航 (Hover-Expandable Nav) */}
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col py-4 px-2 bg-white/60 backdrop-blur-3xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-[32px] w-16 hover:w-64 transition-all duration-300 group/nav overflow-hidden">
+                {/* 左侧悬浮胶囊导航 (Fully Expanded Nav) */}
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col py-4 px-2 bg-white/60 backdrop-blur-3xl border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-[32px] w-64 transition-all duration-300 group/nav overflow-hidden">
                     <div className="w-full flex flex-col gap-2 mt-2">
                         {navItems.map(item => (
                             <button
@@ -357,7 +357,7 @@ const PreviewView = ({
                                     {item.type === 'cover' ? <Compass size={18} /> : item.type === 'video' ? <Video size={18} /> : item.type === 'ppt' ? <LayoutTemplate size={18} /> : item.type === 'resources' ? <FolderOpen size={18} /> : <FileText size={18} />}
                                 </div>
 
-                                <span className={`ml-3 text-sm font-medium truncate opacity-0 group-hover/nav:opacity-100 transition-opacity whitespace-nowrap ${activeDoc?.id === item.id ? 'font-semibold' : ''}`}>
+                                <span className={`ml-3 text-sm font-medium truncate opacity-100 transition-opacity whitespace-nowrap ${activeDoc?.id === item.id ? 'font-semibold' : ''}`}>
                                     {item.name}
                                 </span>
 
@@ -370,7 +370,7 @@ const PreviewView = ({
                 </div>
 
                 {/* 中心主舞台 (The Dynamic Stage) - Full width viewport scrolling */}
-                <div className={`flex-1 relative h-full w-full overflow-y-auto snap-y snap-mandatory custom-scrollbar transition-all duration-500 ${(showStageCopilot && isCopilotOpen) ? 'md:pr-[380px]' : ''}`}>
+                <div className={`flex-1 relative h-full w-full overflow-y-auto snap-y snap-mandatory custom-scrollbar transition-all duration-500 md:pl-72 ${(showStageCopilot && isCopilotOpen) ? 'md:pr-[380px]' : ''}`}>
 
                     {/* 页面级别固定徽标 */}
                     <div className="absolute top-8 right-12 z-10 flex items-center gap-2 text-xs text-zinc-400 font-medium bg-zinc-100/50 backdrop-blur-md px-4 py-2 rounded-full border border-zinc-200/50">
@@ -378,13 +378,13 @@ const PreviewView = ({
                     </div>
 
                     {/* Background decorative elements */}
-                    <div className={`${embedded ? 'absolute' : 'fixed'} inset-0 pointer-events-none md:pl-32 flex justify-center -z-10 bg-[#f4f5f7]`}>
+                    <div className={`${embedded ? 'absolute' : 'fixed'} inset-0 pointer-events-none md:pl-80 flex justify-center -z-10 bg-[#f4f5f7]`}>
                         <div className={`w-full max-w-5xl h-[800px] absolute -top-[200px] left-1/2 -translate-x-1/2 blur-[120px] rounded-full mix-blend-multiply ${theme.auraOne} ${backgroundMood.auraOne}`}></div>
                         <div className={`w-full max-w-5xl h-[800px] absolute top-[60vh] left-1/2 -translate-x-1/3 blur-[120px] rounded-full mix-blend-multiply ${theme.auraTwo} ${backgroundMood.auraTwo}`}></div>
                     </div>
 
                     {navItems.map((doc) => (
-                        <div key={doc.id} id={`module-${doc.id}`} className={`w-full min-h-screen snap-start flex flex-col justify-center px-12 md:px-32 ${density.sectionPadding} relative bg-transparent`}>
+                        <div key={doc.id} id={`module-${doc.id}`} className={`w-full min-h-screen snap-start flex flex-col justify-center px-12 md:pl-16 md:pr-32 ${density.sectionPadding} relative bg-transparent`}>
                             <div className="w-full max-w-6xl mx-auto flex flex-col h-full border-b border-transparent">
 
                                 {/* Handle rendering Intro specially */}
