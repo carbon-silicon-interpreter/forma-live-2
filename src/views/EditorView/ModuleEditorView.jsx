@@ -41,16 +41,16 @@ const getCopilotMessages = (page) => {
 
 const MODULE_VIEW_META = {
     video: {
-        previewLabel: '智能课程',
+        previewLabel: '讲解视频模块',
     },
     questionnaire: {
-        previewLabel: '智能问卷',
+        previewLabel: '问卷调查模块',
     },
     ppt: {
-        previewLabel: '智能课件',
+        previewLabel: 'PPT 介绍模块',
     },
     page: {
-        previewLabel: '智能报告',
+        previewLabel: '图文案例模块',
     },
 };
 

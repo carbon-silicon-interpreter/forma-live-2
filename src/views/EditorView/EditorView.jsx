@@ -4,7 +4,7 @@ import {
     ArrowLeft, Play, Plus, FileText, Eye, HelpCircle, FileBarChart, Presentation,
     LayoutTemplate, Video, Command, Sparkles, X, Globe, CheckSquare, Square,
     Link, Image, Share2, Monitor, Shield, Upload, Smartphone, IdCard, Database,
-    Palette, Bot, Settings2, Compass, FolderOpen
+    Palette, Bot, Settings2, Compass, FolderOpen, MoreHorizontal, Trash2, EyeOff, ChevronDown, CheckCircle2
 } from 'lucide-react';
 import PptViewer from '../../components/blocks/PptViewer';
 import previewCover from '../../assets/preview_cover_1773285524855.png';
@@ -42,14 +42,23 @@ const EditorView = ({
     const [selectedMaterialsPerMod, setSelectedMaterialsPerMod] = useState({});
     const [manualSelectedModTypes, setManualSelectedModTypes] = useState([]); // Now an array for bulk manual
     const [selectedAiModules, setSelectedAiModules] = useState([]); // Tracks selected AI cards for bulk
+    const [activeMoreMenuId, setActiveMoreMenuId] = useState(null);
+
+    const handleUpdateVisibility = (id, visible) => {
+        setPages(prev => prev.map(p => p.id === id ? { ...p, visible } : p));
+    };
+
+    const handleDeleteModule = (id) => {
+        setPages(prev => prev.filter(p => p.id !== id));
+    };
 
     const standardModulesList = [
         { id: 'm_cover', title: '封面导览模块', desc: '用于展示 handbook 的封面、导读和开场信息。' },
-        { id: 'm_faq', title: 'FAQ页', desc: '预设常见问题及标准解答。' },
-        { id: 'm_img', title: '图文案例页', desc: '用于展示案例分析等富文本内容。' },
-        { id: 'm_vid', title: '讲解视频页', desc: '上传视频进行操作演示或宣讲。' },
-        { id: 'm_quiz', title: '问卷调查页', desc: '收集用户反馈、测验或健康诊断。' },
-        { id: 'm_ppt', title: 'PPT介绍页', desc: '嵌入式展示 PPT 文档或产品画册。' },
+        { id: 'm_faq', title: 'FAQ 模块', desc: '预设常见问题及标准解答。' },
+        { id: 'm_img', title: '图文案例模块', desc: '用于展示案例分析等富文本内容。' },
+        { id: 'm_vid', title: '讲解视频模块', desc: '上传视频进行操作演示或宣讲。' },
+        { id: 'm_quiz', title: '问卷调查模块', desc: '收集用户反馈、测验或健康诊断。' },
+        { id: 'm_ppt', title: 'PPT 介绍模块', desc: '嵌入式展示 PPT 文档或产品画册。' },
         { id: 'm_resources', title: '资料下载模块', desc: '用于承接资料、附件和标准交付物下载。' }
     ];
 
@@ -269,29 +278,96 @@ const EditorView = ({
                                     <div className="h-40 bg-zinc-100 relative overflow-hidden flex items-center justify-center transition-all duration-500">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
                                         <ModulePreview page={page} />
-                                        <div className="absolute top-4 left-4 z-20">
+                                        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
                                             <span className="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/50 text-[10px] font-bold text-zinc-900 tracking-wider shadow-sm">
                                                 {page.type === 'cover' ? '封面导览模块' :
                                                     page.type === 'resources' ? '资料下载模块' :
-                                                        page.type === 'video' ? '讲解视频页' :
-                                                            page.type === 'ppt' ? 'PPT介绍页' :
-                                                                page.type === 'questionnaire' ? '问卷调查页' :
-                                                                    '图文案例页'}
+                                                        page.type === 'video' ? '讲解视频模块' :
+                                                            page.type === 'ppt' ? 'PPT 介绍模块' :
+                                                                page.type === 'questionnaire' ? '问卷调查模块' :
+                                                                    '图文案例模块'}
                                             </span>
+                                            {page.visible === false && (
+                                                <span className="px-3 py-1.5 rounded-full bg-rose-500/90 backdrop-blur-md border border-rose-400/50 text-[10px] font-bold text-white tracking-wider shadow-sm flex items-center gap-1">
+                                                    <EyeOff size={10} />
+                                                    已隐藏
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* More Button on Card */}
+                                        <div className="absolute top-4 right-4 z-30">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMoreMenuId(activeMoreMenuId === page.id ? null : page.id);
+                                                }}
+                                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${activeMoreMenuId === page.id ? 'bg-zinc-900 text-white shadow-lg' : 'bg-white/90 backdrop-blur-md text-zinc-600 hover:bg-white shadow-sm'}`}
+                                            >
+                                                <MoreHorizontal size={16} />
+                                            </button>
+
+                                            {activeMoreMenuId === page.id && (
+                                                <>
+                                                    <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setActiveMoreMenuId(null); }} />
+                                                    <div className="absolute top-full right-0 mt-2 w-36 bg-white rounded-2xl border border-zinc-100 shadow-xl z-50 py-1.5 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleUpdateVisibility(page.id, !page.visible);
+                                                                setActiveMoreMenuId(null);
+                                                            }}
+                                                            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-bold text-zinc-700 hover:bg-zinc-50 transition-colors"
+                                                        >
+                                                            {page.visible === false ? <Eye size={14} className="text-zinc-500" /> : <EyeOff size={14} className="text-zinc-500" />}
+                                                            {page.visible === false ? '显示模块' : '隐藏模块'}
+                                                        </button>
+                                                        <div className="h-px bg-zinc-50 my-1 mx-2" />
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (confirm('确定要删除这个模块吗？')) {
+                                                                    handleDeleteModule(page.id);
+                                                                }
+                                                                setActiveMoreMenuId(null);
+                                                            }}
+                                                            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            删除
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
 
-                                        <div className="p-5 flex-1 flex flex-col">
-                                            <div className="flex justify-between items-start">
+                                    <div className="p-5 flex-1 flex flex-col">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex flex-col gap-1 min-w-0 flex-1">
                                                 <h4 className="text-lg font-bold text-zinc-900 leading-snug line-clamp-1">{page.name}</h4>
-                                                <div className="flex gap-1 flex-wrap justify-end">
-                                                    {page.tags?.slice(0, 1).map(tag => (
-                                                        <span key={tag} className="text-[10px] font-medium px-2 py-1 bg-zinc-100/80 rounded-full text-zinc-500">{tag}</span>
-                                                    ))}
+                                                <div className="flex items-center gap-2">
+                                                    {page.visible === false ? (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-500">
+                                                            <EyeOff size={10} />
+                                                            已隐藏
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500">
+                                                            <Eye size={10} />
+                                                            展示中
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
+                                            <div className="flex gap-1 flex-wrap justify-end shrink-0 ml-2">
+                                                {page.tags?.slice(0, 1).map(tag => (
+                                                    <span key={tag} className="text-[10px] font-medium px-2 py-1 bg-zinc-100/80 rounded-full text-zinc-500">{tag}</span>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                            <div className="mt-auto flex items-center justify-end pt-4 border-t border-zinc-50">
+                                        <div className="mt-auto flex items-center justify-end pt-4 border-t border-zinc-50">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); navigate(`/editor/${page.id}`); }}
                                                 className="px-5 py-2 rounded-full bg-zinc-900 text-white hover:bg-zinc-800 text-[11px] font-bold transition-all shadow-sm active:scale-95"

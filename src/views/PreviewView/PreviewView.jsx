@@ -4,7 +4,7 @@ import {
     Sparkles, Video, LayoutTemplate, FileText,
     Fingerprint, Play, ArrowLeft, BarChart3, Edit3,
     Compass, FolderOpen, DownloadCloud, ShieldCheck,
-    Activity, AlertCircle, Clock, MessageSquare
+    Activity, AlertCircle, Clock, MessageSquare, BookOpen
 } from 'lucide-react';
 import PptViewer from '../../components/blocks/PptViewer';
 import RichBlockRenderer from '../../components/blocks/RichBlockRenderer';
@@ -160,6 +160,7 @@ const PreviewView = ({
     const assistantWelcome = aiValues.welcomeMessage || '你好！我是您的法务AI顾问。咱们目前对法务这块的需求主要是哪方面呢？咨询、合同还是用工合规呀？';
     const assistantPlaceholder = aiValues.inputPlaceholder || '描述您的企业法务痛点或咨询问题...';
     const handbookName = styleValues.siteName || 'Living Handbook';
+    const siteIcon = styleValues.siteIcon || 'FH';
     const quickActions = [
         { id: 'assessment', text: aiValues.quickActionAssessment || '进行企业财税健康自测', intent: 'assessment' },
         { id: 'contract', text: aiValues.quickActionContract || '有没有标准的劳动合同附件？', intent: 'contract' },
@@ -292,14 +293,15 @@ const PreviewView = ({
 
     return (
         <div className={rootClassName}>
+            {/* Row 1: Operation Management Bar (Operation Mode Only) */}
             {isOperate && (
-                <div className="shrink-0 w-full h-16 bg-zinc-900 border-b border-zinc-800 text-zinc-300 z-50 flex items-center justify-between px-6 shadow-md relative">
-                    <div className="flex items-center gap-6 text-sm font-medium">
-                        <span className="text-white font-bold flex items-center gap-2"><Sparkles size={16} className={theme.operateSpark} /> {`${handbookName} 运营`}</span>
-                        <div className="w-px h-6 bg-zinc-700"></div>
-
-                        {/* Inline Tabs */}
-                        <div className="flex items-center gap-1 bg-zinc-800/50 p-1 rounded-xl">
+                <div className="shrink-0 w-full h-12 bg-zinc-950 border-b border-zinc-900 z-50 flex items-center justify-between px-6 relative">
+                    <div className="flex items-center gap-6">
+                         <span className="text-zinc-500 text-[10px] font-bold tracking-[0.2em] uppercase">
+                            Operation Portal
+                        </span>
+                        <div className="w-px h-4 bg-zinc-800"></div>
+                        <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-xl border border-zinc-800/50">
                             {['preview', 'insights', 'data', 'chat'].map(tab => {
                                 const labels = {
                                     'preview': '前端预览',
@@ -308,18 +310,18 @@ const PreviewView = ({
                                     'chat': '对话记录'
                                 };
                                 const icons = {
-                                    'preview': <LayoutTemplate size={14} />,
-                                    'insights': <Activity size={14} />,
-                                    'data': <BarChart3 size={14} />,
-                                    'chat': <MessageSquare size={14} />
+                                    'preview': <LayoutTemplate size={12} />,
+                                    'insights': <Activity size={12} />,
+                                    'data': <BarChart3 size={12} />,
+                                    'chat': <MessageSquare size={12} />
                                 };
                                 return (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveOperateTab(tab)}
-                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${activeOperateTab === tab
-                                            ? 'bg-zinc-700 text-white shadow-sm'
-                                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/50'
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${activeOperateTab === tab
+                                            ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700'
+                                            : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30'
                                             }`}
                                     >
                                         {icons[tab]} {labels[tab]}
@@ -329,12 +331,34 @@ const PreviewView = ({
                         </div>
                     </div>
                     {!embedded && (
-                        <button onClick={() => navigate('/editor')} className="flex items-center gap-2 text-sm font-bold bg-white text-black px-4 py-1.5 rounded-xl hover:bg-zinc-200 transition-colors shadow-sm">
-                            <Edit3 size={14} /> 去编辑页面
+                        <button onClick={() => navigate('/editor')} className="flex items-center gap-2 text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg border border-white/10 transition-all shadow-sm">
+                            <Edit3 size={12} /> 返回编辑
                         </button>
                     )}
                 </div>
             )}
+
+            {/* Row 2: Handbook Brand Navigation Bar (Always Visible) */}
+            <div className={`shrink-0 w-full h-16 bg-white/70 backdrop-blur-xl border-b border-zinc-100 z-50 flex items-center justify-between px-6 shadow-sm relative transition-colors duration-500`}>
+                <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${theme.heroGradient} flex items-center justify-center text-white font-bold text-lg shadow-lg ${theme.heroShadow}`}>
+                        {siteIcon}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className={`text-xl font-black tracking-tighter text-zinc-900`}>
+                            企业财税合规 手册
+                        </span>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                   {/* Handbook context stats or secondary actions can go here */}
+                   <div className={`text-[10px] font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-2`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${theme.accentSolid.replace('bg-', 'bg-')} animate-pulse`}></div>
+                        @Living Handbook
+                   </div>
+                </div>
+            </div>
 
             {/* Content Switcher */}
             <div className={`flex-1 relative w-full flex overflow-hidden ${isOperate && activeOperateTab !== 'preview' ? 'hidden' : ''}`}>
